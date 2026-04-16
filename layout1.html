@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stunting App</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+    }
+
+    .sidebar {
+      position: fixed;
+      width: 250px;
+      height: 100vh;
+      background: #77DD77;
+      padding: 20px;
+    }
+
+    .sidebar h4 {
+      color: #2f4f2f;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px;
+      margin-bottom: 5px;
+      color: #333;
+      text-decoration: none;
+      border-radius: 5px;
+      background: #ffffff;
+    }
+
+    .sidebar a:hover {
+      background: #F4F4F4;
+    }
+
+    .content {
+      margin-left: 270px;
+      padding: 30px;
+      background: #F4F4F4;
+      min-height: 100vh;
+    }
+
+    .card-custom {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h4>Stunting App</h4>
+  <hr>
+
+  <a onclick="loadPage('home')">Home</a>
+  <a onclick="loadPage('input')">Input Data</a>
+  <a onclick="loadPage('rekomendasi')">Rekomendasi</a>
+  <a onclick="loadPage('dashboard')">Dashboard</a>
+  <a onclick="loadPage('edukasi')">Edukasi</a>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div id="app"></div>
+</div>
+
+<script>
+function loadPage(page) {
+
+  if (page === 'home') {
+    document.getElementById('app').innerHTML = `
+      <div class="card-custom">
+        <h3>Tips Gizi Anak</h3>
+        <p><b>1.</b> Berikan protein hewani setiap hari (telur, ayam, ikan)</p>
+        <p><b>2.</b> Pastikan asupan sayur dan buah</p>
+        <p><b>3.</b> Hindari makanan ultra-proses</p>
+        <p><b>4.</b> Perhatikan kesehatan mikrobiota usus</p>
+        <p><b>5.</b> Cukupi kebutuhan cairan</p>
+      </div>
+    `;
+  }
+
+  if (page === 'input') {
+    document.getElementById('app').innerHTML = `
+      <div class="card-custom">
+        <h3>Input Data Anak</h3>
+
+        <form id="form">
+          <input class="form-control mb-2" placeholder="Nama" id="nama">
+          <input class="form-control mb-2" placeholder="Umur" id="umur">
+          <input class="form-control mb-2" placeholder="Berat Badan" id="bb">
+          <input class="form-control mb-2" placeholder="Tinggi Badan" id="tb">
+          <input class="form-control mb-2" placeholder="Lingkar Lengan" id="lila">
+          <input class="form-control mb-2" placeholder="Lingkar Kepala" id="lk">
+          <input class="form-control mb-2" placeholder="Alergi" id="alergi">
+
+          <select class="form-control mb-2" id="mikrobiota">
+            <option>Baik</option>
+            <option>Sedang</option>
+            <option>Kurang</option>
+          </select>
+
+          <button class="btn btn-primary">Simpan</button>
+        </form>
+      </div>
+    `;
+
+    document.getElementById("form").onsubmit = async (e) => {
+      e.preventDefault();
+
+      const data = {
+        nama: nama.value,
+        umur: umur.value,
+        bb: bb.value,
+        tb: tb.value,
+        lila: lila.value,
+        lk: lk.value,
+        alergi: alergi.value,
+        mikrobiota: mikrobiota.value
+      };
+
+      await fetch('/child', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      alert("Data tersimpan");
+    };
+  }
+
+  if (page === 'rekomendasi') {
+    document.getElementById('app').innerHTML = `
+      <div class="card-custom">
+        <h3>Rekomendasi Menu</h3>
+        <button class="btn btn-success mb-3" onclick="ambilRekomendasi()">Ambil Rekomendasi</button>
+        <ul id="menu" class="list-group"></ul>
+      </div>
+    `;
+  }
+
+  if (page === 'dashboard') {
+    document.getElementById('app').innerHTML = `
+      <div class="card-custom">
+        <h3>Dashboard</h3>
+        <canvas id="chart"></canvas>
+      </div>
+    `;
+
+    loadChart();
+  }
+
+  if (page === 'edukasi') {
+    document.getElementById('app').innerHTML = `
+      <div class="card-custom">
+        <h3>Edukasi</h3>
+        <ul>
+          <li>Pentingnya protein untuk pertumbuhan</li>
+          <li>Peran mikrobiota usus</li>
+          <li>Pola makan seimbang</li>
+        </ul>
+      </div>
+    `;
+  }
+}
+
+// REKOMENDASI
+async function ambilRekomendasi() {
+  const res = await fetch('/child');
+  const data = await res.json();
+  const last = data[data.length-1];
+
+  const rec = await fetch(`/recommendation?bb=${last.bb}&tb=${last.tb}&alergi=${last.alergi}`);
+  const menu = await rec.json();
+
+  document.getElementById('menu').innerHTML = "";
+  menu.forEach(m => {
+    document.getElementById('menu').innerHTML += `<li class="list-group-item">${m}</li>`;
+  });
+}
+
+// CHART
+async function loadChart() {
+  const res = await fetch('/child');
+  const data = await res.json();
+
+  const labels = data.map(d => d.created_at);
+  const bb = data.map(d => d.bb);
+  const tb = data.map(d => d.tb);
+
+  new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'BB', data: bb },
+        { label: 'TB', data: tb }
+      ]
+    }
+  });
+}
+
+// DEFAULT LOAD
+loadPage('home');
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>

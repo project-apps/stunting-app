@@ -1,0 +1,53 @@
+<div class="container">
+  <h3>Input Data Anak</h3>
+
+  <form id="form">
+    <div class="row">
+      <div class="col-md-6">
+        <input class="form-control mb-2" placeholder="Nama" id="nama">
+        <input class="form-control mb-2" placeholder="Umur (bulan)" id="umur">
+        <input class="form-control mb-2" placeholder="Berat Badan" id="bb">
+        <input class="form-control mb-2" placeholder="Tinggi Badan" id="tb">
+      </div>
+
+      <div class="col-md-6">
+        <input class="form-control mb-2" placeholder="Lingkar Lengan" id="lila">
+        <input class="form-control mb-2" placeholder="Lingkar Kepala" id="lk">
+        <input class="form-control mb-2" placeholder="Alergi" id="alergi">
+        
+        <select class="form-control mb-2" id="mikrobiota">
+          <option>Baik</option>
+          <option>Sedang</option>
+          <option>Kurang</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary">Simpan</button>
+  </form>
+</div>
+
+<script>
+document.getElementById("form").onsubmit = async (e) => {
+  e.preventDefault();
+
+  const data = {
+    nama: nama.value,
+    umur: umur.value,
+    bb: bb.value,
+    tb: tb.value,
+    lila: lila.value,
+    lk: lk.value,
+    alergi: alergi.value,
+    mikrobiota: mikrobiota.value
+  };
+
+  await fetch('/child', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+
+  alert("Data tersimpan");
+};
+</script>

@@ -1,0 +1,23 @@
+<div class="container">
+  <h3>Rekomendasi Menu</h3>
+
+  <button onclick="load()" class="btn btn-success mb-3">Ambil Rekomendasi</button>
+
+  <ul id="list" class="list-group"></ul>
+</div>
+
+<script>
+async function load() {
+  const res = await fetch('/child');
+  const data = await res.json();
+  const last = data[data.length-1];
+
+  const rec = await fetch(`/recommendation?bb=${last.bb}&tb=${last.tb}&alergi=${last.alergi}`);
+  const menu = await rec.json();
+
+  list.innerHTML = "";
+  menu.forEach(m => {
+    list.innerHTML += `<li class="list-group-item">${m}</li>`;
+  });
+}
+</script>
