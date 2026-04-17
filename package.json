@@ -4,5 +4,13 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "express": "^4.22.1",
+    "express-session": "^1.19.0",
+    "pdfkit": "^0.18.0",
+    "sqlite3": "^6.0.1"
   }
 }
